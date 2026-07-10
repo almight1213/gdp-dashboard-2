@@ -271,6 +271,41 @@ def generate_sr_signal(df: pd.DataFrame, i: int) -> str:
     return "flat"
 
 
+def generate_range_trading_signal(df: pd.DataFrame, i: int) -> str:
+    row = df.iloc[i]
+    support = row.get("support")
+    resistance = row.get("resistance")
+
+    if pd.isna(support) or pd.isna(resistance):
+        return "flat"
+
+    range_width = float(resistance - support)
+    if range_width <= 0:
+        return "flat"
+
+    # Price must be inside the range.
+    if not (support <= row["close"] <= resistance):
+        return "flat"
+
+    # Define the outer edges of the range as the decision zones.
+    zone = range_width * 0.25
+    near_support = row["close"] <= support + zone
+    near_resistance = row["close"] >= resistance - zone
+
+    prev_row = df.iloc[i - 1] if i > 0 else None
+    prev_close = prev_row["close"] if prev_row is not None else np.nan
+
+    # Simple rejection logic:
+    # - BUY when price is near support and closes higher than the prior candle
+    # - SELL when price is near resistance and closes lower than the prior candle
+    if near_support and (pd.isna(prev_close) or row["close"] >= prev_close):
+        return "long"
+    if near_resistance and (pd.isna(prev_close) or row["close"] <= prev_close):
+        return "short"
+
+    return "flat"
+
+
 # -----------------------------
 # BACKTEST ENGINE
 # -----------------------------
@@ -294,6 +329,8 @@ def run_backtest(
         signal = "flat"
         if strategy_name == "Support & Resistance":
             signal = generate_sr_signal(df, i)
+        elif strategy_name == "Range Trading Strategy":
+            signal = generate_range_trading_signal(df, i)
 
         if signal == "flat":
             i += 1
@@ -637,7 +674,7 @@ with left_col:
     timeframe_options = ["15M", "30M", "1H"]
     selected_timeframe = st.selectbox("Timeframe", options=timeframe_options, index=0)
 
-    strategy_options = ["Support & Resistance"]
+    strategy_options = ["Support & Resistance", "Range Trading Strategy"]
     selected_strategy = st.selectbox("Strategy", options=strategy_options, index=0)
 
     st.markdown("<div style='height: 0.55rem;'></div>", unsafe_allow_html=True)

@@ -222,64 +222,10 @@ def load_oanda_data(pair: str, timeframe: str, count: int = 5000) -> Tuple[pd.Da
     return df, f"oanda:{instrument}:{granularity}"
 
 
-def load_csv_data(pair: str, timeframe: str) -> Tuple[pd.DataFrame, str]:
-    pair_key = pair.replace("/", "").lower()
-    tf_key = timeframe.lower()
-    csv_path = f"data/{pair_key}_{tf_key}.csv"
-    csv_df = pd.read_csv(csv_path)
-    data = _normalize_ohlcv_schema(csv_df)
-    return data, f"csv:{csv_path}"
-
-
-def load_synthetic_data(timeframe: str) -> Tuple[pd.DataFrame, str]:
-    # temporary dev fallback only
-    np.random.seed(42)
-    periods = 1200
-    tf_key = timeframe.lower()
-    freq_map = {"15m": "15min", "30m": "30min", "1h": "1H"}
-    freq = freq_map.get(tf_key, "15min")
-
-    timestamps = pd.date_range(end=pd.Timestamp.utcnow(), periods=periods, freq=freq)
-    base = 1.08
-    returns = np.random.normal(0.0, 0.0007, size=periods)
-    close = base * np.exp(np.cumsum(returns))
-
-    open_ = np.concatenate([[close[0]], close[:-1]])
-    spread = np.random.uniform(0.0002, 0.0012, size=periods)
-    high = np.maximum(open_, close) + spread
-    low = np.minimum(open_, close) - spread
-    volume = np.random.randint(100, 5000, size=periods)
-
-    synth = pd.DataFrame(
-        {
-            "timestamp": timestamps,
-            "open": open_,
-            "high": high,
-            "low": low,
-            "close": close,
-            "volume": volume,
-        }
-    )
-    synth = _normalize_ohlcv_schema(synth)
-    return synth, "synthetic:fallback"
-
-
 @st.cache_data(show_spinner=False)
 def load_market_data(pair: str, timeframe: str) -> Tuple[pd.DataFrame, str]:
-    # 1) OANDA first
-    try:
-        return load_oanda_data(pair, timeframe)
-    except Exception:
-        pass
-
-    # 2) CSV fallback
-    try:
-        return load_csv_data(pair, timeframe)
-    except Exception:
-        pass
-
-    # 3) Synthetic fallback
-    return load_synthetic_data(timeframe)
+    # OANDA only — no fallback to CSV or synthetic
+    return load_oanda_data(pair, timeframe)
 
 
 # -----------------------------
@@ -703,32 +649,36 @@ with left_col:
 # RUN REAL BACKTEST
 # -----------------------------
 if launch:
-    candles, source = load_market_data(selected_pair, selected_timeframe)
-    reward_ratio = parse_reward_ratio(selected_reward)
+    try:
+        candles, source = load_market_data(selected_pair, selected_timeframe)
+        reward_ratio = parse_reward_ratio(selected_reward)
 
-    trades, equity_df, ending_balance = run_backtest(
-        candles=candles,
-        initial_balance=float(selected_balance),
-        risk_pct=float(selected_risk),
-        reward_ratio=reward_ratio,
-        strategy_name=selected_strategy,
-    )
+        trades, equity_df, ending_balance = run_backtest(
+            candles=candles,
+            initial_balance=float(selected_balance),
+            risk_pct=float(selected_risk),
+            reward_ratio=reward_ratio,
+            strategy_name=selected_strategy,
+        )
 
-    stats = compute_performance_stats(
-        trades=trades,
-        equity=equity_df,
-        initial_balance=float(selected_balance),
-        ending_balance=float(ending_balance),
-    )
+        stats = compute_performance_stats(
+            trades=trades,
+            equity=equity_df,
+            initial_balance=float(selected_balance),
+            ending_balance=float(ending_balance),
+        )
 
-    st.session_state.backtest_ran = True
-    st.session_state.results = stats
-    st.session_state.equity = equity_df
-    st.session_state.data_source = source
-    st.session_state.trade_log = trades
-    st.session_state.selected_risk = float(selected_risk)
-    st.session_state.selected_reward = selected_reward
-    st.session_state.selected_balance = float(selected_balance)
+        st.session_state.backtest_ran = True
+        st.session_state.results = stats
+        st.session_state.equity = equity_df
+        st.session_state.data_source = source
+        st.session_state.trade_log = trades
+        st.session_state.selected_risk = float(selected_risk)
+        st.session_state.selected_reward = selected_reward
+        st.session_state.selected_balance = float(selected_balance)
+    except Exception as e:
+        st.session_state.backtest_ran = False
+        st.error(f"Failed to load OANDA market data: {e}")
 
 # -----------------------------
 # CENTER DASHBOARD

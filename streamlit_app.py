@@ -306,6 +306,46 @@ def generate_range_trading_signal(df: pd.DataFrame, i: int) -> str:
     return "flat"
 
 
+def generate_pullback_trading_signal(df: pd.DataFrame, i: int) -> str:
+    if i < 3:
+        return "flat"
+
+    row = df.iloc[i]
+    prev = df.iloc[i - 1]
+    prev2 = df.iloc[i - 2]
+    prev3 = df.iloc[i - 3]
+
+    if pd.isna(row["support"]) or pd.isna(row["resistance"]):
+        return "flat"
+
+    # Trend definition via recent swing structure.
+    bullish_trend = (
+        row["close"] > prev["close"] > prev2["close"]
+        and row["high"] >= prev["high"]
+        and prev["high"] >= prev2["high"]
+        and row["low"] >= prev["low"]
+    )
+    bearish_trend = (
+        row["close"] < prev["close"] < prev2["close"]
+        and row["low"] <= prev["low"]
+        and prev["low"] <= prev2["low"]
+        and row["high"] <= prev["high"]
+    )
+
+    pullback_zone_up = row["close"] <= row["support"] + (row["resistance"] - row["support"]) * 0.35
+    pullback_zone_down = row["close"] >= row["resistance"] - (row["resistance"] - row["support"]) * 0.35
+
+    bullish_confirmation = row["close"] > row["open"] and row["close"] > prev["high"]
+    bearish_confirmation = row["close"] < row["open"] and row["close"] < prev["low"]
+
+    if bullish_trend and pullback_zone_up and bullish_confirmation:
+        return "long"
+    if bearish_trend and pullback_zone_down and bearish_confirmation:
+        return "short"
+
+    return "flat"
+
+
 # -----------------------------
 # BACKTEST ENGINE
 # -----------------------------
@@ -331,6 +371,8 @@ def run_backtest(
             signal = generate_sr_signal(df, i)
         elif strategy_name == "Range Trading Strategy":
             signal = generate_range_trading_signal(df, i)
+        elif strategy_name == "Pullback Trading Strategy":
+            signal = generate_pullback_trading_signal(df, i)
 
         if signal == "flat":
             i += 1
@@ -674,7 +716,7 @@ with left_col:
     timeframe_options = ["15M", "30M", "1H"]
     selected_timeframe = st.selectbox("Timeframe", options=timeframe_options, index=0)
 
-    strategy_options = ["Support & Resistance", "Range Trading Strategy"]
+    strategy_options = ["Support & Resistance", "Range Trading Strategy", "Pullback Trading Strategy"]
     selected_strategy = st.selectbox("Strategy", options=strategy_options, index=0)
 
     st.markdown("<div style='height: 0.55rem;'></div>", unsafe_allow_html=True)

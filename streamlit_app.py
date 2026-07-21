@@ -797,12 +797,13 @@ if launch:
         c13, _, _, _ = st.columns(4)
         c13.metric("Ending Account Balance", r["Ending Account Balance"])
 suggestion = st.session_state.volume_optimization_suggestion
+suggestion = st.session_state.volume_optimization_suggestion
         if suggestion is not None:
             render_optimization_banner(suggestion)
+            
         st.markdown("<div style='height: 0.85rem;'></div>", unsafe_allow_html=True)
         st.markdown("<div class='results-title' style='font-size:0.95rem;'>EQUITY CURVE</div>", unsafe_allow_html=True)
         st.line_chart(st.session_state.equity, use_container_width=True)
-
         st.markdown("<div style='height: 1.0rem;'></div>", unsafe_allow_html=True)
         st.markdown("<div class='results-title' style='font-size:0.95rem;'>Trade Log</div>", unsafe_allow_html=True)
 

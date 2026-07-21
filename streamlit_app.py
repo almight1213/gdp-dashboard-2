@@ -727,8 +727,7 @@ if launch:
     try:
         candles, source = load_market_data(selected_pair, selected_timeframe)
         reward_ratio = parse_reward_ratio(selected_reward)
-        
-        # 1. Close run_backtest cleanly first:
+        # 1. Run the backtest and close the parenthesis cleanly:
         trades, equity_df, ending_balance = run_backtest(
             candles=candles,
             initial_balance=float(selected_balance),
@@ -736,6 +735,13 @@ if launch:
             reward_ratio=reward_ratio,
             strategy_name=selected_strategy,
         )
+
+        # 2. Start the optimization mapping on a fresh line:
+        trade_items: List[BacktestTrade] = []
+        for idx, t in enumerate(trades, start=1):
+            # Approximate entry environment from existing fields
+      
+        
 
         # 2. Start trade_items on a fresh, clean line below it:
         trade_items: List[BacktestTrade] = []

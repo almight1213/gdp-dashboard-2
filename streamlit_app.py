@@ -729,7 +729,6 @@ if launch:
         reward_ratio = parse_reward_ratio(selected_reward)
         trades, equity_df, ending_balance = run_backtest(
             candles=candles,
-            # Build BacktestResult payload for optimization analyzer
     trade_items: List[BacktestTrade] = []
     for idx, t in enumerate(trades, start=1):
         # Approximate entry environment from existing fields:

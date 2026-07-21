@@ -727,11 +727,20 @@ if launch:
     try:
         candles, source = load_market_data(selected_pair, selected_timeframe)
         reward_ratio = parse_reward_ratio(selected_reward)
+        
+        # 1. Close run_backtest cleanly first:
         trades, equity_df, ending_balance = run_backtest(
             candles=candles,
-    trade_items: List[BacktestTrade] = []
-    for idx, t in enumerate(trades, start=1):
-        # Approximate entry environment from existing fields:
+            initial_balance=float(selected_balance),
+            risk_pct=float(selected_risk),
+            reward_ratio=reward_ratio,
+            strategy_name=selected_strategy,
+        )
+
+        # 2. Start trade_items on a fresh, clean line below it:
+        trade_items: List[BacktestTrade] = []
+        for idx, t in enumerate(trades, start=1):
+            # Approximate entry environment from existing fiel here
         # current_volume -> position_size proxy
         # avg_volume_20 -> risk_amount proxy
     # ... (the rest of Copilot's Step 2 code)

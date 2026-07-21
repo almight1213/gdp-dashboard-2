@@ -738,17 +738,19 @@ if launch:
 
         # 2. Start the optimization mapping on a fresh line:
         trade_items: List[BacktestTrade] = []
-        for idx, t in enumerate(trades, start=1):
-            # Approximate entry environment from existing fields
-      
-        
+     trades, equity_df, ending_balance = run_backtest(
+            candles=candles,
+            initial_balance=float(selected_balance),
+            risk_pct=float(selected_risk),
+            reward_ratio=reward_ratio,
+            strategy_name=selected_strategy,
+        )
 
-        # 2. Start trade_items on a fresh, clean line below it:
         trade_items: List[BacktestTrade] = []
         for idx, t in enumerate(trades, start=1):
-            # Approximate entry environment from existing fiel here
-        # current_volume -> position_size proxy
-        # avg_volume_20 -> risk_amount proxy
+            # Approximate entry environment from existing fields:
+            # current_volume -> position_size proxy
+            # avg_volume_20 -> risk_amount proxy
     # ... (the rest of Copilot's Step 2 code)
             initial_balance=float(selected_balance),
             risk_pct=float(selected_risk),

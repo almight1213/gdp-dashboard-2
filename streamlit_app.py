@@ -754,7 +754,7 @@ if launch:
             risk_pct=float(selected_risk),
             reward_ratio=reward_ratio,
             strategy_name=selected_strategy,
-        )
+        
         stats = compute_performance_stats(
             trades=trades,
             equity=equity_df,

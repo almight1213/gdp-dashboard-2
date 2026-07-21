@@ -729,6 +729,13 @@ if launch:
         reward_ratio = parse_reward_ratio(selected_reward)
         trades, equity_df, ending_balance = run_backtest(
             candles=candles,
+            # Build BacktestResult payload for optimization analyzer
+    trade_items: List[BacktestTrade] = []
+    for idx, t in enumerate(trades, start=1):
+        # Approximate entry environment from existing fields:
+        # current_volume -> position_size proxy
+        # avg_volume_20 -> risk_amount proxy
+    # ... (the rest of Copilot's Step 2 code)
             initial_balance=float(selected_balance),
             risk_pct=float(selected_risk),
             reward_ratio=reward_ratio,

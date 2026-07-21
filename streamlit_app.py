@@ -727,12 +727,8 @@ if launch:
     try:
         candles, source = load_market_data(selected_pair, selected_timeframe)
         reward_ratio = parse_reward_ratio(selected_reward)
-        # 1. Run the backtest and close the parenthesis cleanly:
+
         trades, equity_df, ending_balance = run_backtest(
-            candles=candles,
-            initial_balance=float(selected_balance),
-            risk_pct=float(selected_risk),
-            trades, equity_df, ending_balance = run_backtest(
             candles=candles,
             initial_balance=float(selected_balance),
             risk_pct=float(selected_risk),
@@ -745,15 +741,18 @@ if launch:
             # Approximate entry environment from existing fields:
             # current_volume -> position_size proxy
             # avg_volume_20 -> risk_amount proxy
-            # Approximate entry environment from existing fields:
-            # current_volume -> position_size proxy
-            # avg_volume_20 -> risk_amount proxy
-    # ... (the rest of Copilot's Step 2 code)
-            initial_balance=float(selected_balance),
-            risk_pct=float(selected_risk),
-            reward_ratio=reward_ratio,
-            strategy_name=selected_strategy,
-        
+            trade_items.append(
+                BacktestTrade(
+                    id=str(idx),
+                    entry_time=str(t.get("entry_time", "")),
+                    exit_time=str(t.get("exit_time", "")),
+                    pnl=float(t.get("pnl", 0.0)),
+                    return_pct=float(t.get("return_pct", 0.0)),
+                    position_size=float(t.get("current_volume", 1.0)),
+                    risk_amount=float(t.get("avg_volume_20", 1.0)),
+                )
+            )
+
         stats = compute_performance_stats(
             trades=trades,
             equity=equity_df,
@@ -771,20 +770,6 @@ if launch:
     except Exception as e:
         st.session_state.backtest_ran = False
         st.error(f"Failed to load OANDA market data: {e}")
-
-
-with center_col:
-    st.markdown("<div class='results-shell'>", unsafe_allow_html=True)
-    st.markdown("<div class='results-title'>BACKTEST ANALYTICS</div>", unsafe_allow_html=True)
-
-    if not st.session_state.backtest_ran:
-        st.markdown(
-            "<p class='helper-text'>Configure your strategy in CONTROL, then click 🚀 Launch Backtest to view statistics and the equity curve.</p>",
-            unsafe_allow_html=True,
-        )
-    else:
-        r = st.session_state.results
-        st.markdown(f"<p class='helper-text'>Data source: {st.session_state.data_source}</p>", unsafe_allow_html=True)
 
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Win Rate", r["Win Rate"])

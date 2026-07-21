@@ -774,7 +774,12 @@ with center_col:
 
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("Win Rate", r["Win Rate"])
-        c2.metric("Net Profit", r["Net Profit"])
+        # Net Profit display can be overridden by optimization toggle
+        net_profit_display = r["Net Profit"]
+        suggestion = st.session_state.volume_optimization_suggestion
+        if st.session_state.use_optimized_return and suggestion is not None:
+            net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"
+        c2.metric("Net Profit", net_profit_display)
         c3.metric("Net Return (%)", r["Net Return (%)"])
         c4.metric("Total Trades", r["Total Trades"])
 
@@ -792,7 +797,9 @@ with center_col:
 
         c13, _, _, _ = st.columns(4)
         c13.metric("Ending Account Balance", r["Ending Account Balance"])
-
+suggestion = st.session_state.volume_optimization_suggestion
+        if suggestion is not None:
+            render_optimization_banner(suggestion)
         st.markdown("<div style='height: 0.85rem;'></div>", unsafe_allow_html=True)
         st.markdown("<div class='results-title' style='font-size:0.95rem;'>EQUITY CURVE</div>", unsafe_allow_html=True)
         st.line_chart(st.session_state.equity, use_container_width=True)

@@ -1,5 +1,16 @@
 import streamlit as st
 import pandas as pd
+
+# -----------------------------
+# OPTIMIZATION BANNER UI
+# -----------------------------
+if "volume_optimization_suggestion" not in st.session_state:
+    st.session_state.volume_optimization_suggestion = None
+
+if "use_optimized_return" not in st.session_state:
+    st.session_state.use_optimized_return = False
+
+# (Plus any of the TypedDict classes or the render_optimization_banner function Copilot gave you in that first block)
 import numpy as np
 import requests
 from dataclasses import dataclass

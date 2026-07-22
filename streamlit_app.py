@@ -751,7 +751,7 @@ if launch:
     
         trade_items: List[BacktestTrade] = []
         for idx, t in enumerate(trades, start=1):
-        trade_items.append(
+            trade_items.append(
             BacktestTrade(
                 id=str(idx),
                 entry_time=str(getattr(t, "entry_time", getattr(t, "EntryTime", ""))),

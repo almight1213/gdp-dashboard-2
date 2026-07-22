@@ -749,7 +749,7 @@ if launch:
         strategy_name=selected_strategy,
     )
     
-                trade_items: List[BacktestTrade] = []
+     trade_items: List[BacktestTrade] = []
     for idx, t in enumerate(trades, start=1):
         trade_items.append(
             BacktestTrade(

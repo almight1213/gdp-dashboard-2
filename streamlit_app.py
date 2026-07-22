@@ -806,7 +806,7 @@ if launch:
         c1, c2, c3, c4 = st.columns(4)
         # Check if r was successfully created and has data
 if 'r' in locals() and r is not None:
-c1.metric("Win Rate", r["Win Rate"])
+    c1.metric("Win Rate", r["Win Rate"])
     # Put your other metric displays inside this block too!
 else:
     st.warning("No backtest results available. Check your data connection.")

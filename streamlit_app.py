@@ -741,7 +741,7 @@ if launch:
     try:
         candles, source = load_market_data(selected_pair, selected_timeframe)
         reward_ratio = parse_reward_ratio(selected_reward)
-trades, equity_df, ending_balance = run_backtest(
+        trades, equity_df, ending_balance = run_backtest(
         candles=candles,
         initial_balance=float(selected_balance),
         risk_pct=float(selected_risk),

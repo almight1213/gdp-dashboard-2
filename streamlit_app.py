@@ -750,12 +750,19 @@ if launch:
             strategy_name=selected_strategy,
         )
 
-        trade_items: List[BacktestTrade] = []
+       trade_items: List[BacktestTrade] = []
         for idx, t in enumerate(trades, start=1):
-            # Approximate entry environment from existing fields:
-            # current_volume -> position_size proxy
-            # avg_volume_20 -> risk_amount proxy
             trade_items.append(
+                BacktestTrade(
+                    id=str(idx),
+                    entry_time=str(getattr(t, "entry_time", getattr(t, "EntryTime", ""))),
+                    exit_time=str(getattr(t, "exit_time", getattr(t, "ExitTime", ""))),
+                    pnl=float(getattr(t, "pnl", getattr(t, "PnL", 0.0))),
+                    return_pct=float(getattr(t, "return_pct", getattr(t, "ReturnPct", 0.0))),
+                    position_size=float(getattr(t, "current_volume", getattr(t, "Size", 1.0))),
+                    risk_amount=float(getattr(t, "avg_volume_20", 1.0)),
+                )
+            )(
                 BacktestTrade(
                     id=str(idx),
                     entry_time=str(t.get("entry_time", "")),

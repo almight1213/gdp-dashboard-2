@@ -747,10 +747,8 @@ if launch:
             initial_balance=float(selected_balance),
             risk_pct=float(selected_risk),
             reward_ratio=reward_ratio,
-            strategy_name=selected_strategy,
-        )
-
-       trade_items: List[BacktestTrade] = []
+            strategy_name=selected_strategy,)
+trade_items: List[BacktestTrade] = []
         for idx, t in enumerate(trades, start=1):
             trade_items.append(
                 BacktestTrade(

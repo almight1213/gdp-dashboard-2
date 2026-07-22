@@ -795,8 +795,8 @@ else:
      # Net Profit display can be overridden by optimization toggle
     net_profit_display = r["Net Profit"]
     suggestion = st.session_state.volume_optimization_suggestion
-        if st.session_state.use_optimized_return and suggestion is not None:
-            net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"
+    if st.session_state.use_optimized_return and suggestion is not None:
+         net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"
         c2.metric("Net Profit", net_profit_display)
         c3.metric("Net Return (%)", r["Net Return (%)"])
         c4.metric("Total Trades", r["Total Trades"])

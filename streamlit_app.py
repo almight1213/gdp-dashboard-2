@@ -1,3 +1,17 @@
+import numpy as np
+import requests
+from dataclasses import dataclass
+from typing import List, Tuple, Dict
+
+@dataclass
+class BacktestTrade:
+    id: str
+    entry_time: str
+    exit_time: str
+    pnl: float
+    return_pct: float
+    position_size: float
+    risk_amount: float
 import streamlit as st
 import pandas as pd
 

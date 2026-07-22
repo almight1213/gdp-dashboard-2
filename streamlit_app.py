@@ -806,12 +806,12 @@ if launch:
         c1, c2, c3, c4 = st.columns(4)
         # Check if r was successfully created and has data
 if 'r' in locals() and r is not None:
-    c1.metric("Win Rate", r["Win Rate"])
+c1.metric("Win Rate", r["Win Rate"])
     # Put your other metric displays inside this block too!
 else:
     st.warning("No backtest results available. Check your data connection.")
      # Net Profit display can be overridden by optimization toggle
-        net_profit_display = r["Net Profit"]
+net_profit_display = r["Net Profit"]
         suggestion = st.session_state.volume_optimization_suggestion
         if st.session_state.use_optimized_return and suggestion is not None:
         net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"

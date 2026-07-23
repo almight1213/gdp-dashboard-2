@@ -812,7 +812,7 @@ else:
     st.warning("No backtest results available. Check your data connection.")
      # Net Profit display can be overridden by optimization toggle
 net_profit_display = r["Net Profit"]
-        suggestion = st.session_state.volume_optimization_suggestion
+suggestion = st.session_state.volume_optimization_suggestion
         if st.session_state.use_optimized_return and suggestion is not None:
         net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"
         c2.metric("Net Profit", net_profit_display)

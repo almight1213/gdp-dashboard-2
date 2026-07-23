@@ -860,4 +860,5 @@ if st.session_state.use_optimized_return and suggestion is not None:
             )
             st.dataframe(styled_log, use_container_width=True, height=420)
 
-    st.markdown("</div>", unsafe_allow_html=True)
+             st.markdown("</div>", unsafe_allow_html=True)
+#

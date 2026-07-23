@@ -1,19 +1,9 @@
+import streamlit as st
+import pandas as pd
 import numpy as np
 import requests
 from dataclasses import dataclass
-from typing import List, Tuple, Dict
-
-@dataclass
-class BacktestTrade:
-    id: str
-    entry_time: str
-    exit_time: str
-    pnl: float
-    return_pct: float
-    position_size: float
-    risk_amount: float
-import streamlit as st
-import pandas as pd
+from typing import Dict, List, Tuple
 
 # -----------------------------
 # OPTIMIZATION BANNER UI
@@ -24,16 +14,26 @@ if "volume_optimization_suggestion" not in st.session_state:
 if "use_optimized_return" not in st.session_state:
     st.session_state.use_optimized_return = False
 
-# (Plus any of the TypedDict classes or the render_optimization_banner function Copilot gave you in that first block)
-import numpy as np
-import requests
-from dataclasses import dataclass
-from typing import List, Tuple, Dict
-
 # -----------------------------
 # PAGE SETUP
 # -----------------------------
 st.set_page_config(page_title="Tradepulse V", layout="wide")
+
+
+def render_optimization_banner(suggestion: Dict[str, object]) -> None:
+    if not isinstance(suggestion, dict):
+        return
+
+    optimized_return = suggestion.get("optimized_return_percent")
+    if optimized_return is None:
+        return
+
+    try:
+        optimized_return_value = float(optimized_return)
+    except (TypeError, ValueError):
+        return
+
+    st.info(f"Volume optimization suggestion available: {optimized_return_value:.2f}% projected return.")
 
 # -----------------------------
 # DARK THEME + PREMIUM STYLING
@@ -661,7 +661,7 @@ def _format_trade_log_dataframe(trades: List[Trade], risk_pct: float, reward_lab
     return pd.DataFrame(rows).sort_values("Trade #", ascending=False).reset_index(drop=True)[columns]
 
 
-def _style_trade_log(df: pd.DataFrame) -> "pd.io.formats.style.Styler":
+def _style_trade_log(df: pd.DataFrame) -> object:
     def row_style(row):
         result = str(row.get("Result (Win/Loss)", "")).lower()
         bg = "rgba(34, 197, 94, 0.10)" if result == "win" else ("rgba(239, 68, 68, 0.10)" if result == "loss" else "transparent")
@@ -670,19 +670,22 @@ def _style_trade_log(df: pd.DataFrame) -> "pd.io.formats.style.Styler":
     def zebra(col):
         return ["background-color: rgba(148, 163, 184, 0.05);" if i % 2 else "" for i in range(len(col))]
 
-    return (
-        df.style
-        .apply(zebra, axis=0)
-        .apply(row_style, axis=1)
-        .set_properties(**{"color": "#e2e8f0", "border-color": "#1e2a40", "font-size": "0.90rem", "text-align": "right", "white-space": "nowrap"})
-        .set_properties(subset=["Trade #", "Entry Time", "Exit Time", "Position (Buy/Sell)", "Result (Win/Loss)"], **{"text-align": "left"})
-        .set_table_styles(
-            [
-                {"selector": "thead th", "props": [("background-color", "#0c1422"), ("color", "#cbd5e1"), ("border", "1px solid #1e2a40"), ("font-weight", "700"), ("text-align", "left")]},
-                {"selector": "tbody td", "props": [("border", "1px solid #1e2a40")]},
-            ]
+    try:
+        return (
+            df.style
+            .apply(zebra, axis=0)
+            .apply(row_style, axis=1)
+            .set_properties(**{"color": "#e2e8f0", "border-color": "#1e2a40", "font-size": "0.90rem", "text-align": "right", "white-space": "nowrap"})
+            .set_properties(subset=["Trade #", "Entry Time", "Exit Time", "Position (Buy/Sell)", "Result (Win/Loss)"], **{"text-align": "left"})
+            .set_table_styles(
+                [
+                    {"selector": "thead th", "props": [("background-color", "#0c1422"), ("color", "#cbd5e1"), ("border", "1px solid #1e2a40"), ("font-weight", "700"), ("text-align", "left")]},
+                    {"selector": "tbody td", "props": [("border", "1px solid #1e2a40")]},
+                ]
+            )
         )
-    )
+    except Exception:
+        return df
 
 
 for key, default in [
@@ -742,48 +745,12 @@ if launch:
         candles, source = load_market_data(selected_pair, selected_timeframe)
         reward_ratio = parse_reward_ratio(selected_reward)
         trades, equity_df, ending_balance = run_backtest(
-        candles=candles,
-        initial_balance=float(selected_balance),
-        risk_pct=float(selected_risk),
-        reward_ratio=reward_ratio,
-        strategy_name=selected_strategy,
-    )
-    
-        trade_items: List[BacktestTrade] = []
-        for idx, t in enumerate(trades, start=1):
-            trade_items.append(
-            BacktestTrade(
-                id=str(idx),
-                entry_time=str(getattr(t, "entry_time", getattr(t, "EntryTime", ""))),
-                exit_time=str(getattr(t, "exit_time", getattr(t, "ExitTime", ""))),
-                pnl=float(getattr(t, "pnl", getattr(t, "PnL", 0.0))),
-                return_pct=float(getattr(t, "return_pct", getattr(t, "ReturnPct", 0.0))),
-                position_size=float(getattr(t, "current_volume", getattr(t, "Size", 1.0))),
-                risk_amount=float(getattr(t, "avg_volume_20", 1.0)),
-            )
+            candles=candles,
+            initial_balance=float(selected_balance),
+            risk_pct=float(selected_risk),
+            reward_ratio=reward_ratio,
+            strategy_name=selected_strategy,
         )
-        for idx, t in enumerate(trades, start=1):
-            trade_items.append(
-                BacktestTrade(
-                    id=str(idx),
-                    entry_time=str(getattr(t, "entry_time", getattr(t, "EntryTime", ""))),
-                    exit_time=str(getattr(t, "exit_time", getattr(t, "ExitTime", ""))),
-                    pnl=float(getattr(t, "pnl", getattr(t, "PnL", 0.0))),
-                    return_pct=float(getattr(t, "return_pct", getattr(t, "ReturnPct", 0.0))),
-                    position_size=float(getattr(t, "current_volume", getattr(t, "Size", 1.0))),
-                    risk_amount=float(getattr(t, "avg_volume_20", 1.0)),
-                )
-            )(
-                BacktestTrade(
-                    id=str(idx),
-                    entry_time=str(t.get("entry_time", "")),
-                    exit_time=str(t.get("exit_time", "")),
-                    pnl=float(t.get("pnl", 0.0)),
-                    return_pct=float(t.get("return_pct", 0.0)),
-                    position_size=float(t.get("current_volume", 1.0)),
-                    risk_amount=float(t.get("avg_volume_20", 1.0)),
-                )
-            )
 
         stats = compute_performance_stats(
             trades=trades,
@@ -801,20 +768,36 @@ if launch:
         st.session_state.selected_balance = float(selected_balance)
     except Exception as e:
         st.session_state.backtest_ran = False
-        st.error(f"Failed to load OANDA market data: {e}")
+        st.session_state.results = {}
+        st.session_state.equity = None
+        st.session_state.data_source = ""
+        st.session_state.trade_log = []
+        st.warning("Backtest could not be completed. Please check your data connection and try again.")
+        st.caption(f"Details: {e}")
 
+with center_col:
+    st.markdown("<div class='results-shell'>", unsafe_allow_html=True)
+    st.markdown("<div class='results-title'>BACKTEST RESULTS</div>", unsafe_allow_html=True)
+
+    results = st.session_state.results if isinstance(st.session_state.results, dict) else {}
+    equity = st.session_state.equity
+    suggestion = st.session_state.volume_optimization_suggestion
+    has_results = bool(results) and st.session_state.backtest_ran
+
+    if has_results:
+        r = results
         c1, c2, c3, c4 = st.columns(4)
-        # Check if r was successfully created and has data
-if 'r' in locals() and r is not None:
-    c1.metric("Win Rate", r["Win Rate"])
-    # Put your other metric displays inside this block too!
-else:
-    st.warning("No backtest results available. Check your data connection.")
-     # Net Profit display can be overridden by optimization toggle
-net_profit_display = r["Net Profit"]
-suggestion = st.session_state.volume_optimization_suggestion
-if st.session_state.use_optimized_return and suggestion is not None:
-        net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"
+        c1.metric("Win Rate", r["Win Rate"])
+
+        net_profit_display = r["Net Profit"]
+        if st.session_state.use_optimized_return and suggestion is not None:
+            try:
+                optimized_return = float(suggestion["optimized_return_percent"])
+            except (KeyError, TypeError, ValueError):
+                optimized_return = None
+            if optimized_return is not None:
+                net_profit_display = f"{optimized_return:.2f}%"
+
         c2.metric("Net Profit", net_profit_display)
         c3.metric("Net Return (%)", r["Net Return (%)"])
         c4.metric("Total Trades", r["Total Trades"])
@@ -833,13 +816,22 @@ if st.session_state.use_optimized_return and suggestion is not None:
 
         c13, _, _, _ = st.columns(4)
         c13.metric("Ending Account Balance", r["Ending Account Balance"])
-        suggestion = st.session_state.volume_optimization_suggestion
-        suggestion = st.session_state.volume_optimization_suggestion
         if suggestion is not None:
-            render_optimization_banner(suggestion)    
+            render_optimization_banner(suggestion)
+
+        if st.session_state.data_source:
+            st.caption(f"Data source: {st.session_state.data_source}")
+
         st.markdown("<div style='height: 0.85rem;'></div>", unsafe_allow_html=True)
         st.markdown("<div class='results-title' style='font-size:0.95rem;'>EQUITY CURVE</div>", unsafe_allow_html=True)
-        st.line_chart(st.session_state.equity, use_container_width=True)
+        if equity is None or equity.empty:
+            st.markdown(
+                "<p class='helper-text'>No equity curve available for this backtest.</p>",
+                unsafe_allow_html=True,
+            )
+        else:
+            st.line_chart(equity, use_container_width=True)
+
         st.markdown("<div style='height: 1.0rem;'></div>", unsafe_allow_html=True)
         st.markdown("<div class='results-title' style='font-size:0.95rem;'>Trade Log</div>", unsafe_allow_html=True)
 
@@ -859,4 +851,12 @@ if st.session_state.use_optimized_return and suggestion is not None:
                 )
             )
             st.dataframe(styled_log, use_container_width=True, height=420)
-        st.markdown("</div>", unsafe_allow_html=True)             
+    elif st.session_state.backtest_ran:
+        st.warning("No backtest results available. Check your data connection.")
+    else:
+        st.markdown(
+            "<p class='helper-text'>Run a backtest to generate performance metrics, an equity curve, and a trade log.</p>",
+            unsafe_allow_html=True,
+        )
+
+    st.markdown("</div>", unsafe_allow_html=True)

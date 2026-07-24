@@ -854,11 +854,11 @@ if launch:
     st.markdown("<div style='height: 1.0rem;'></div>", unsafe_allow_html=True)
     st.markdown("<div class='results-title' style='font-size:0.95rem;'>Trade Log</div>", unsafe_allow_html=True)
 
-        trades_for_log = st.session_state.trade_log
-        if not trades_for_log:
-            st.markdown(
-                "<p class='helper-text'>No trades available. Run a backtest to generate a Trade Log.</p>",
-                unsafe_allow_html=True,
+    trades_for_log = st.session_state.trade_log
+    if not trades_for_log:
+    st.markdown(
+    "<p class='helper-text'>No trades available. Run a backtest to generate a Trade Log.</p>",
+    unsafe_allow_html=True,
             )
         else:
             styled_log = _style_trade_log(

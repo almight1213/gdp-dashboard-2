@@ -842,7 +842,7 @@ if launch:
     c11.metric("Largest Win", r["Largest Win"])
     c12.metric("Largest Loss", r["Largest Loss"])
 
-        c13, _, _, _ = st.columns(4)
+    c13, _, _, _ = st.columns(4)
         c13.metric("Ending Account Balance", r["Ending Account Balance"])
         suggestion = st.session_state.volume_optimization_suggestion
         suggestion = st.session_state.volume_optimization_suggestion

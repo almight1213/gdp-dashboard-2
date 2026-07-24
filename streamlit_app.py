@@ -799,25 +799,34 @@ if launch:
         st.session_state.selected_risk = float(selected_risk)
         st.session_state.selected_reward = selected_reward
         st.session_state.selected_balance = float(selected_balance)
-    except Exception as e:
+   except Exception as e:
         st.session_state.backtest_ran = False
         st.error(f"Failed to load OANDA market data: {e}")
 
-        c1, c2, c3, c4 = st.columns(4)
-        # Check if r was successfully created and has data
-if 'r' in locals() and r is not None:
-    c1.metric("Win Rate", r["Win Rate"])
-    # Put your other metric displays inside this block too!
-else:
-    st.warning("No backtest results available. Check your data connection.")
-     # Net Profit display can be overridden by optimization toggle
-net_profit_display = r["Net Profit"]
-suggestion = st.session_state.volume_optimization_suggestion
-if st.session_state.use_optimized_return and suggestion is not None:
-        net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"
+    # 1. OUTSIDE the try/except block so the columns always render
+    c1, c2, c3, c4 = st.columns(4)
+
+    # 2. Grab the results safely from session_state (since you saved 'stats' there earlier)
+    r = st.session_state.get("results", None)
+
+    # 3. Safely check if the backtest ran AND the results exist
+    if st.session_state.get("backtest_ran", False) and r is not None:
+        c1.metric("Win Rate", r.get("Win Rate", "N/A"))
+        
+        # Handle the optimization override logic safely
+        net_profit_display = r.get("Net Profit", "N/A")
+        suggestion = st.session_state.get("volume_optimization_suggestion", None)
+        
+        if st.session_state.get("use_optimized_return", False) and suggestion is not None:
+            net_profit_display = f"{suggestion['optimized_return_percent']:.2f}%"
+            
         c2.metric("Net Profit", net_profit_display)
-        c3.metric("Net Return (%)", r["Net Return (%)"])
-        c4.metric("Total Trades", r["Total Trades"])
+        c3.metric("Net Return (%)", r.get("Net Return (%)", "N/A"))
+        c4.metric("Total Trades", r.get("Total Trades", "N/A"))
+        
+    else:
+        # If the try block failed, or data is missing, we gracefully show this warning
+        st.warning("No backtest results available. Check your OANDA data connection.")
 
         c5, c6, c7, c8 = st.columns(4)
         c5.metric("Winning Trades", r["Winning Trades"])

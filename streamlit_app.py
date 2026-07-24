@@ -826,9 +826,9 @@ if launch:
         
     else:
     # If the try block failed, or data is missing, we gracefully show this warning
-    st.warning("No backtest results available. Check your OANDA data connection.")
-    st.write("RESULT KEYS:", r.keys())
-    st.write("RESULT:", r)
+        st.warning("No backtest results available. Check your OANDA data connection.")
+        st.write("RESULT KEYS:", r.keys())
+        st.write("RESULT:", r)
 
     c5, c6, c7, c8 = st.columns(4)
     c5.metric("Winning Trades", r["Winning Trades"])

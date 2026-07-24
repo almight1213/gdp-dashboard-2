@@ -799,7 +799,7 @@ if launch:
         st.session_state.selected_risk = float(selected_risk)
         st.session_state.selected_reward = selected_reward
         st.session_state.selected_balance = float(selected_balance)
-   except Exception as e:
+    except Exception as e:
         st.session_state.backtest_ran = False
         st.error(f"Failed to load OANDA market data: {e}")
 

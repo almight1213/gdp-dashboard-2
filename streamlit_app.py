@@ -825,21 +825,23 @@ if launch:
         c4.metric("Total Trades", r.get("Total Trades", "N/A"))
         
     else:
-        # If the try block failed, or data is missing, we gracefully show this warning
-        st.warning("No backtest results available. Check your OANDA data connection.")
-        st.write("RESULT KEYS:", r.keys())
-st.write("RESULT:", r)
-        c5, c6, c7, c8 = st.columns(4)
-        c5.metric("Winning Trades", r["Winning Trades"])
-        c6.metric("Losing Trades", r["Losing Trades"])
-        c7.metric("Profit Factor", r["Profit Factor"])
-        c8.metric("Maximum Drawdown", r["Maximum Drawdown"])
+    # If the try block failed, or data is missing, we gracefully show this warning
+    st.warning("No backtest results available. Check your OANDA data connection.")
 
-        c9, c10, c11, c12 = st.columns(4)
-        c9.metric("Average Win", r["Average Win"])
-        c10.metric("Average Loss", r["Average Loss"])
-        c11.metric("Largest Win", r["Largest Win"])
-        c12.metric("Largest Loss", r["Largest Loss"])
+    st.write("RESULT KEYS:", r.keys())
+    st.write("RESULT:", r)
+
+    c5, c6, c7, c8 = st.columns(4)
+    c5.metric("Winning Trades", r["Winning Trades"])
+    c6.metric("Losing Trades", r["Losing Trades"])
+    c7.metric("Profit Factor", r["Profit Factor"])
+    c8.metric("Maximum Drawdown", r["Maximum Drawdown"])
+
+    c9, c10, c11, c12 = st.columns(4)
+    c9.metric("Average Win", r["Average Win"])
+    c10.metric("Average Loss", r["Average Loss"])
+    c11.metric("Largest Win", r["Largest Win"])
+    c12.metric("Largest Loss", r["Largest Loss"])
 
         c13, _, _, _ = st.columns(4)
         c13.metric("Ending Account Balance", r["Ending Account Balance"])
